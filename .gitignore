@@ -1,10 +1,59 @@
-# Python-generated files
+# ==============================================================================
+# Python Build, Bytecode, & Packaging
+# ==============================================================================
 __pycache__/
-*.py[oc]
+*.py[codz]
+*$py.class
+*.so
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+.eggs/
+MANIFEST
 
-# Virtual environments
-.venv
+# ==============================================================================
+# Environments & Dependency Managers
+# ==============================================================================
+.venv/
+.uv/
+node_modules/
+
+# Explicitly keep lockfiles for reproducibility
+!uv.lock
+
+# ==============================================================================
+# Code Quality, Testing, & Diagnostics
+# ==============================================================================
+.coverage
+.coverage.*
+*.cover
+*.lcov
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ==============================================================================
+# Compiled Language Engines (Do Not Ignore Core Source Directories)
+# ==============================================================================
+# Ignore rust target artifacts but preserve project layout
+engines/rust/target/
+
+# Ignore local debugging binaries or temporary scratch outputs
+*.exe
+*.out
+*.log
+
+# ==============================================================================
+# Editor & Local User Environments
+# ==============================================================================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+tempCodeRunnerFile.py
+.DS_Store
+.env
+.envrc

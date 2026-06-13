@@ -11,22 +11,28 @@ requires-python = ">=3.14"
 dependencies = ["dulwich>=1.2.6"]
 
 [project.scripts]
-gads = "gads.cli:main" # This maps the 'gads' command to your main() function
+gads = "gads.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/gads"]
 
 [dependency-groups]
-dev = ["pytest>=9.1.0", "ruff>=0.15.17", "taskipy>=1.14.1", "ty>=0.0.49"]
+dev = [
+    "pytest>=9.1.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.17",
+    "taskipy>=1.14.1",
+    "ty>=0.0.49",
+]
+
+# ==============================================================================
+# Tool Configurations
+# ==============================================================================
 
 [tool.ruff]
 target-version = "py314"
 line-length = 88
-
-# Source directories to check
 src = ["src"]
-
-# Exclude non-Python workspaces and typical virtual environments
 exclude = [
     ".git",
     ".uv",
@@ -38,12 +44,10 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-# Enable Pyflakes (F) and Error (E) codes by default (Flake8 equivalents)
-select = ["E", "F", "I"] # "I" handles automatic import sorting (isort style)
+select = ["E", "F", "I"]
 ignore = []
 
 [tool.ruff.format]
-# Match Black's exact formatting defaults
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
@@ -51,22 +55,16 @@ line-ending = "auto"
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra -q"
+addopts = "-ra -q --cov=src --cov-report=term-missing"
 testpaths = ["tests"]
 pythonpath = ["src"]
 
+[tool.coverage.run]
+omit = ["tests/*", "**/test_*.py"]
+
 [tool.taskipy.tasks]
-# Run pytest across the workspace
 test = "pytest"
-
-# Check for code linting and sort imports automatically via ruff
 lint = "ruff check . --fix"
-
-# Format the workspace code files layout
 format = "ruff format ."
-
-# Run ty type checks
 typecheck = "ty check ."
-
-# Run a combined quality gate (format, lint, then test)
-check-all = "task format && task lint && task typecheck && task test"
+check-all = "task lint && task format && task typecheck && task test"
