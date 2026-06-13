@@ -17,7 +17,7 @@ gads = "gads.cli:main" # This maps the 'gads' command to your main() function
 packages = ["src/gads"]
 
 [dependency-groups]
-dev = ["pytest>=9.1.0", "ruff>=0.15.17", "taskipy>=1.14.1"]
+dev = ["pytest>=9.1.0", "ruff>=0.15.17", "taskipy>=1.14.1", "ty>=0.0.49"]
 
 [tool.ruff]
 target-version = "py314"
@@ -65,5 +65,8 @@ lint = "ruff check . --fix"
 # Format the workspace code files layout
 format = "ruff format ."
 
+# Run ty type checks
+typecheck = "ty check ."
+
 # Run a combined quality gate (format, lint, then test)
-check-all = "task format && task lint && task test"
+check-all = "task format && task lint && task typecheck && task test"
