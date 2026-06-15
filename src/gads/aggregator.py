@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from gads.engine import CommitRecord, get_commit_history, scan_for_repos
 
@@ -23,7 +22,7 @@ class GlobalSummary:
 
 
 def harvest_workspace_metrics(
-    root_path: Path, days: int, branch: Optional[str] = None
+    root_path: Path, days: int, branch: str | None = None
 ) -> GlobalSummary:
     """
     Scans a root directory context recursively, harvesting chronological

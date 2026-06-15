@@ -2,11 +2,11 @@ import datetime
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-from typing import Optional
 
 from dulwich.errors import NotGitRepository
 from dulwich.objects import Commit, ObjectID
 from dulwich.patch import write_tree_diff
+from dulwich.refs import Ref
 from dulwich.repo import Repo
 
 
@@ -19,7 +19,7 @@ class CommitRecord:
     deletions: int
 
 
-def safe_resolve_dir(dir_path: Path) -> Optional[Path]:
+def safe_resolve_dir(dir_path: Path) -> Path | None:
     """
     Shared guard to safely expand, resolve, and verify that a path
     is a valid, accessible directory. Returns None on failure.
@@ -33,7 +33,7 @@ def safe_resolve_dir(dir_path: Path) -> Optional[Path]:
     return None
 
 
-def get_repo_instance(path: Path) -> Optional[Repo]:
+def get_repo_instance(path: Path) -> Repo | None:
     """
     Attempts to initialize a Repo object out of a target path.
     Returns the Repo instance if valid, or None if it's not a git repository.
@@ -101,7 +101,7 @@ def parse_patch_stats(patch_bytes: bytes) -> tuple[int, int]:
     return additions, deletions
 
 
-def resolve_target_sha(repo: Repo, branch: Optional[str] = None) -> Optional[ObjectID]:
+def resolve_target_sha(repo: Repo, branch: str | None = None) -> ObjectID | None:
     """
     Resolves a target reference to its corresponding commit SHA ObjectID based on
     the following cascade rules:
@@ -116,18 +116,18 @@ def resolve_target_sha(repo: Repo, branch: Optional[str] = None) -> Optional[Obj
 
     if branch:
         ref_bytes = branch.encode("utf-8")
-        possible_refs = [ref_bytes, b"refs/heads/" + ref_bytes]
-
-        for ref_key, sha_val in refs_dict.items():
-            if ref_key in possible_refs:
-                return sha_val
+        # Accept both short name and full ref path
+        for candidate in (ref_bytes, b"refs/heads/" + ref_bytes):
+            sha = refs_dict.get(Ref(candidate))
+            if sha is not None:
+                return sha
         return None
 
     # Precedence fallback chain
-    for candidate in [b"refs/heads/main", b"refs/heads/master"]:
-        for ref_key, sha_val in refs_dict.items():
-            if ref_key == candidate:
-                return sha_val
+    for candidate in (b"refs/heads/main", b"refs/heads/master"):
+        sha = refs_dict.get(Ref(candidate))
+        if sha is not None:
+            return sha
 
     try:
         return repo.head()
@@ -137,7 +137,7 @@ def resolve_target_sha(repo: Repo, branch: Optional[str] = None) -> Optional[Obj
 
 
 def get_commit_history(
-    repo: Repo, since_days: Optional[int] = None, branch: Optional[str] = None
+    repo: Repo, since_days: int | None = None, branch: str | None = None
 ) -> list[CommitRecord]:
     """
     Extracts high-fi chronological tracking metadata for commits in the repository.
@@ -148,7 +148,7 @@ def get_commit_history(
     if not target_sha:
         return records
 
-    cutoff_timestamp: Optional[float] = None
+    cutoff_timestamp: float | None = None
     if since_days is not None:
         cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(
             days=since_days
@@ -176,7 +176,7 @@ def get_commit_history(
             commit.commit_time, datetime.timezone.utc
         )
 
-        parent_tree_id: Optional[bytes] = None
+        parent_tree_id: bytes | None = None
         if commit.parents:
             parent_commit = repo.object_store[commit.parents[0]]
             if isinstance(parent_commit, Commit):

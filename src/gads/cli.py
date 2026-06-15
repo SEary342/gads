@@ -1,10 +1,9 @@
 import importlib.metadata
 from pathlib import Path
-from typing import Optional
 
 import typer
 
-from gads.aggregator import harvest_workspace_metrics  # New core dependency
+from gads.aggregator import harvest_workspace_metrics
 from gads.engine import get_commit_history, get_repo_instance, scan_for_repos
 
 try:
@@ -23,12 +22,13 @@ def version_callback(value: bool) -> None:
 app = typer.Typer(
     name="gads",
     help=f"Git Author & Date Statistics aggregator (v{__version__})",
+    no_args_is_help=True,
 )
 
 
 @app.callback()
 def base_options(
-    version: Optional[bool] = typer.Option(
+    version: bool | None = typer.Option(
         None,
         "--version",
         "-v",
@@ -37,8 +37,7 @@ def base_options(
         help="Show tool version and exit.",
     ),
 ) -> None:
-    """Global configuration layer for gads."""
-    pass
+    """Global options shared across all gads commands."""
 
 
 @app.command(name="log")
@@ -47,13 +46,13 @@ def log(
         Path("."),
         help="Target directory containing the git repository.",
     ),
-    branch: Optional[str] = typer.Option(
+    branch: str | None = typer.Option(
         None,
         "--branch",
         "-b",
         help="Target branch name (falls back to main -> master -> HEAD).",
     ),
-    days: Optional[int] = typer.Option(
+    days: int | None = typer.Option(
         None,
         "--days",
         "-d",
@@ -140,13 +139,11 @@ def aggregate(
         "-d",
         help="Number of days back to collect history across all discovered repos.",
     ),
-    branch: Optional[str] = typer.Option(
+    branch: str | None = typer.Option(
         None,
         "--branch",
         "-b",
-        help=(
-            "Override to target a specific branch name globally across repositories."
-        ),
+        help="Override to target a specific branch name globally across repositories.",
     ),
 ) -> None:
     """Scan a directory space recursively and harvest commit metrics."""
